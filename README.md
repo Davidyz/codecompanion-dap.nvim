@@ -28,6 +28,17 @@ Using `lazy.nvim`:
       dap = {
         enabled = true
       }
+      opts = {
+        -- show the tool group instead of individual tools in the chat buffer
+        collapse_tools = true,
+        tool_opts = {
+          source = {
+            -- load the file content from the
+            -- filesystem when possible.
+            prefer_filesystem = true,
+          }
+        }
+      }
     }
   }
 }

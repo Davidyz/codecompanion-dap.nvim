@@ -3,9 +3,13 @@
 
 local tool_name = "dap_source"
 
----@param opts CodeCompanionDap.ToolOpts
+---@class CodeCompanionDap.SourceTool.Opts: CodeCompanionDap.ToolOpts
+---@field prefer_filesystem boolean
+
+---@param opts CodeCompanionDap.SourceTool.Opts
 ---@return CodeCompanion.Agent.Tool
 return function(opts)
+  opts = vim.tbl_deep_extend("force", { prefer_filesystem = true }, opts or {})
   ---@type CodeCompanion.Agent.Tool|{}
   return {
     name = tool_name,
@@ -28,6 +32,7 @@ The request retrieves the content of a source file by source reference or path i
               description = "The path to the source file to retrieve content for. Use this if 'sourceReference' is not available.",
             },
           },
+          required = { "sourceReference" },
         },
       },
     },
@@ -46,6 +51,28 @@ The request retrieves the content of a source file by source reference or path i
         if params.sourceReference ~= nil then
           args.sourceReference = params.sourceReference
         elseif params.sourcePath ~= nil then
+          local path = vim.fs.normalize(params.sourcePath)
+          local stat = vim.uv.fs_stat(path)
+          if opts.prefer_filesystem and stat and stat.type == "file" then
+            local fd = vim.uv.fs_open(path, "r", 438)
+            if fd == nil or stat == nil or stat.size == nil then
+              return {
+                status = "error",
+                data = string.format("Failed to open %s", path),
+              }
+            end
+            assert(type(stat.size) == "number", "Invalid file stat!")
+            local content, err = vim.uv.fs_read(fd, stat.size, 0)
+            vim.uv.fs_close(fd)
+            if content then
+              return {
+                status = "success",
+                data = { content = content, sourcePath = path },
+              }
+            else
+              return { status = "error", data = err }
+            end
+          end
           args.source = { path = params.sourcePath }
         else
           return {
