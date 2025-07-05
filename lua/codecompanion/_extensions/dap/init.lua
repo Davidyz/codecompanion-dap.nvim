@@ -4,7 +4,7 @@
 
 ---@class CodeCompanionDap.ToolOpts
 
----@alias CodeCompanionDap.ToolName "threads"
+---@alias CodeCompanionDap.ToolName "scopes"| "source" | "stackTrace" | "stepping" | "threads" | "variables"
 
 ---@class CodeCompanionDap.Opts
 ---@field tool_opts {CodeCompanionDap.ToolName: CodeCompanionDap.ToolOpts}
@@ -14,6 +14,7 @@ local options = {
     scopes = {},
     source = {},
     stackTrace = {},
+    stepping = {},
     threads = {},
     variables = {},
   },

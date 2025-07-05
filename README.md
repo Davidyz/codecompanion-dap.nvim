@@ -55,6 +55,9 @@ Currently the following DAP requests are implemented:
 *   **`source`**: Fetch the content of a source file by its reference or file path.
 *   **`scopes`**: Get the available scopes for a specified stack frame.
 *   **`stackTrace`**: Obtain the call stack (stack trace) for a given thread.
+* **`stepping`**: Execute stepping actions (`stepIn`, `stepOut`, `stepBack`, `next`,
+  `continue`) in the
+  debug session.
 *   **`variables`**: Inspect variables within a specific scope or variable reference.
 
 More features are on the way.
