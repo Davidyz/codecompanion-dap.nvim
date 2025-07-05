@@ -41,6 +41,9 @@ The request retrieves a list of all threads in the current DAP session. Calling 
       ---@param self CodeCompanion.Agent.Tool
       ---@param agent CodeCompanion.Agent
       error = function(self, agent, _, stderr)
+        if type(stderr) == "table" then
+          stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
+        end
         agent.chat:add_tool_output(
           self,
           stderr,

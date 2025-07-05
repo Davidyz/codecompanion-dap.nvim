@@ -83,7 +83,9 @@ The request provides stepping functionalities for the current DAP session.
       ---@param self CodeCompanion.Agent.Tool
       ---@param agent CodeCompanion.Agent
       error = function(self, agent, _, stderr)
-        stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
+        if type(stderr) == "table" then
+          stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
+        end
         agent.chat:add_tool_output(
           self,
           stderr,

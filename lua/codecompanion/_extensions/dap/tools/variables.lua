@@ -75,6 +75,9 @@ The request retrieves the contents of a scope or variables reference.
       ---@param self CodeCompanion.Agent.Tool
       ---@param agent CodeCompanion.Agent
       error = function(self, agent, _, stderr)
+        if type(stderr) == "table" then
+          stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
+        end
         agent.chat:add_tool_output(
           self,
           stderr,

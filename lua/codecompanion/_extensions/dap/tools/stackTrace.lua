@@ -67,6 +67,9 @@ The request retrieves the call stack for a given thread in the current DAP sessi
       ---@param self CodeCompanion.Agent.Tool
       ---@param agent CodeCompanion.Agent
       error = function(self, agent, _, stderr)
+        if type(stderr) == "table" then
+          stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
+        end
         agent.chat:add_tool_output(
           self,
           stderr,
