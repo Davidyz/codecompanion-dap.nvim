@@ -62,7 +62,7 @@ The request retrieves the content of a source file by source reference or path i
               data = { content = res.content, sourcePath = params.sourcePath },
             })
           else
-            cb({ status = "error", data = err })
+            cb({ status = "error", data = err.message })
           end
         end)
       end,
@@ -71,7 +71,6 @@ The request retrieves the content of a source file by source reference or path i
       ---@param self CodeCompanion.Agent.Tool
       ---@param agent CodeCompanion.Agent
       error = function(self, agent, _, stderr)
-        stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
         agent.chat:add_tool_output(
           self,
           stderr,

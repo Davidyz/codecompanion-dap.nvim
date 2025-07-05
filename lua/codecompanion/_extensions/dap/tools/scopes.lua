@@ -43,7 +43,7 @@ The request retrieves the scopes for a given stackframe in the current DAP sessi
           if err == nil then
             cb({ status = "success", data = res.scopes })
           else
-            cb({ status = "error", data = err })
+            cb({ status = "error", data = err.message })
           end
         end)
       end,
@@ -52,7 +52,6 @@ The request retrieves the scopes for a given stackframe in the current DAP sessi
       ---@param self CodeCompanion.Agent.Tool
       ---@param agent CodeCompanion.Agent
       error = function(self, agent, _, stderr)
-        stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
         agent.chat:add_tool_output(
           self,
           stderr,
