@@ -34,8 +34,12 @@ The request provides stepping functionalities for the current DAP session.
               description = "The granularity of one step. If omitted, 'statement' is assumed.",
               enum = { "statement", "line", "instruction" },
             },
+            targetId = {
+              type = "number",
+              description = "The ID of the step target to step to. ONLY PASS THIS VALUE IF OBTAINED FROM `StepInTargets` REQUESTS.",
+            },
           },
-          required = { "action" },
+          required = { "action", "threadId" },
         },
       },
     },
@@ -66,6 +70,9 @@ The request provides stepping functionalities for the current DAP session.
         end
         if params.granularity ~= nil and params.action ~= "continue" then
           args.granularity = params.granularity
+        end
+        if params.targetId and params.action == "stepIn" then
+          args.targetId = params.targetId
         end
 
         timer.call(function()
