@@ -57,6 +57,8 @@ Currently the following DAP requests are implemented:
 
 * **`breakpoints`**: Get, set, and clear breakpoints in the current DAP
   session.
+* **`evaluate`**: Evaluate an expression or variable within the context of a
+  stack frame.
 * **`scopes`**: Get the available scopes for a specified stack frame.
 * **`source`**: Fetch the content of a source file by its reference or file path.
 * **`stackTrace`**: Obtain the call stack (stack trace) for a given thread.

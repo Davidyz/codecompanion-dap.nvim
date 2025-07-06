@@ -3,6 +3,7 @@
 ---@class CodeCompanion.DapExtension: CodeCompanion.Extension
 
 ---@class CodeCompanionDap.ToolOpts
+---@field requires_approval? boolean
 
 ---@class CodeCompanionDap.Opts
 ---@field tool_opts {string: CodeCompanionDap.ToolOpts}
@@ -11,6 +12,7 @@
 local options = {
   tool_opts = {
     breakpoints = {},
+    evaluate = {},
     scopes = {},
     source = {},
     stackTrace = {},
@@ -36,14 +38,17 @@ local Extension = {
     local config = require("codecompanion.config").config
     local tool_group = {}
     for tool_name, tool_opts in pairs(options.tool_opts) do
-      local full_tool_name = "dap_" .. tool_name
-      config.strategies.chat.tools[full_tool_name] = {
-        description = string.format("DAP %s tool", tool_name),
-        callback = require(
-          string.format("codecompanion._extensions.dap.tools.%s", tool_name)
-        )(tool_opts),
-      }
-      table.insert(tool_group, full_tool_name)
+      if tool_opts then
+        local full_tool_name = "dap_" .. tool_name
+        config.strategies.chat.tools[full_tool_name] = {
+          description = string.format("DAP %s tool", tool_name),
+          callback = require(
+            string.format("codecompanion._extensions.dap.tools.%s", tool_name)
+          )(tool_opts),
+          opts = { requires_approval = tool_opts.requires_approval },
+        }
+        table.insert(tool_group, full_tool_name)
+      end
     end
 
     config.strategies.chat.tools.groups["dap"] = {
