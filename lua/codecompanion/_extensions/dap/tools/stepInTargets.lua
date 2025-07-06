@@ -2,6 +2,8 @@
 ---@module "dap"
 
 local tool_name = "dap_stepInTargets"
+local timer = require("codecompanion._extensions.dap.timer")
+local utils = require("codecompanion._extensions.dap.utils")
 
 ---@param opts CodeCompanionDap.ToolOpts
 ---@return CodeCompanion.Agent.Tool
@@ -44,15 +46,17 @@ The request retrieves possible step-in targets for the current DAP session.
           args.frameId = params.frameId
         end
 
-        session:request("stepInTargets", args, function(err, res)
-          if err == nil then
-            cb({
-              status = "success",
-              data = res.targets or {},
-            })
-          else
-            cb({ status = "error", data = err.message })
-          end
+        timer.call(function()
+          session:request("stepInTargets", args, function(err, res)
+            if err == nil then
+              cb({
+                status = "success",
+                data = utils.convert_path(res.targets) or {},
+              })
+            else
+              cb({ status = "error", data = err.message })
+            end
+          end)
         end)
       end,
     },

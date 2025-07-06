@@ -2,6 +2,7 @@
 ---@module "dap"
 
 local timer = require("codecompanion._extensions.dap.timer")
+local utils = require("codecompanion._extensions.dap.utils")
 local tool_name = "dap_source"
 
 ---@class CodeCompanionDap.SourceTool.Opts: CodeCompanionDap.ToolOpts
@@ -114,7 +115,7 @@ The request retrieves the content of a source file by source reference or path i
       end,
       ---@param agent CodeCompanion.Agent
       success = function(_, agent, _, stdout)
-        local response_data = stdout[#stdout]
+        local response_data = utils.convert_path(stdout[#stdout])
         local source_content = response_data.content
         local source_path = response_data.sourcePath
 
@@ -124,7 +125,7 @@ The request retrieves the content of a source file by source reference or path i
             agent.tool,
             source_content,
             string.format(
-              "**DAP Source Tool**: Successfully retrieved source from path: %s",
+              "**DAP Source Tool**: Successfully retrieved source from path: `%s`",
               source_path
             )
           )

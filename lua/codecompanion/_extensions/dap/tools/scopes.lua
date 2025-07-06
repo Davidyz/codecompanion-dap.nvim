@@ -2,6 +2,7 @@
 ---@module "dap"
 
 local timer = require("codecompanion._extensions.dap.timer")
+local utils = require("codecompanion._extensions.dap.utils")
 local tool_name = "dap_scopes"
 
 ---@param opts CodeCompanionDap.ToolOpts
@@ -43,7 +44,7 @@ The request retrieves the scopes for a given stackframe in the current DAP sessi
         timer.call(function()
           session:request("scopes", { frameId = params.frameId }, function(err, res)
             if err == nil then
-              cb({ status = "success", data = res.scopes })
+              cb({ status = "success", data = utils.convert_path(res.scopes) })
             else
               cb({ status = "error", data = err.message })
             end

@@ -2,6 +2,7 @@
 ---@module "dap"
 
 local timer = require("codecompanion._extensions.dap.timer")
+local utils = require("codecompanion._extensions.dap.utils")
 local tool_name = "dap_evaluate"
 
 ---@param opts CodeCompanionDap.ToolOpts
@@ -59,7 +60,7 @@ Evaluates an expression in the context of the debuggee and returns its value.
         timer.call(function()
           session:request("evaluate", args, function(err, res)
             if err == nil then
-              cb({ status = "success", data = res })
+              cb({ status = "success", data = utils.convert_path(res) })
             else
               cb({ status = "error", data = err.message })
             end

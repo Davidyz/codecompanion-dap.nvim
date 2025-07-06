@@ -2,6 +2,7 @@
 ---@module "dap"
 
 local timer = require("codecompanion._extensions.dap.timer")
+local utils = require("codecompanion._extensions.dap.utils")
 local tool_name = "dap_breakpoints"
 
 ---@param opts CodeCompanionDap.ToolOpts
@@ -127,7 +128,7 @@ Sets or lists breakpoints in the current DAP session.
         )
       end,
       success = function(_, agent, _, stdout)
-        local response_data = stdout[#stdout]
+        local response_data = utils.convert_path(stdout[#stdout])
 
         local count = #response_data.breakpoints
 
