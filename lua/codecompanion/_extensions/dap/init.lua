@@ -4,10 +4,8 @@
 
 ---@class CodeCompanionDap.ToolOpts
 
----@alias CodeCompanionDap.ToolName "scopes"| "source" | "stackTrace" | "stepping" | "threads" | "variables"
-
 ---@class CodeCompanionDap.Opts
----@field tool_opts {CodeCompanionDap.ToolName: CodeCompanionDap.ToolOpts}
+---@field tool_opts {string: CodeCompanionDap.ToolOpts}
 ---@field collapse_tools boolean
 ---@field interval_ms? integer
 local options = {
@@ -16,6 +14,7 @@ local options = {
     source = {},
     stackTrace = {},
     stepping = {},
+    stepInTargets = {},
     threads = {},
     variables = {},
   },
