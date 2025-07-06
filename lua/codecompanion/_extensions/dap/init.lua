@@ -10,6 +10,7 @@
 ---@field interval_ms? integer
 local options = {
   tool_opts = {
+    breakpoints = {},
     scopes = {},
     source = {},
     stackTrace = {},

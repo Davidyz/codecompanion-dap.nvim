@@ -55,13 +55,16 @@ buffer to supply the tools from this extension to the LLM.
 
 Currently the following DAP requests are implemented:
 
-*   **`threads`**: Retrieve a list of all active threads in the current DAP session.
-*   **`source`**: Fetch the content of a source file by its reference or file path.
-*   **`scopes`**: Get the available scopes for a specified stack frame.
-*   **`stackTrace`**: Obtain the call stack (stack trace) for a given thread.
+* **`breakpoints`**: Get, set, and clear breakpoints in the current DAP
+  session.
+* **`scopes`**: Get the available scopes for a specified stack frame.
+* **`source`**: Fetch the content of a source file by its reference or file path.
+* **`stackTrace`**: Obtain the call stack (stack trace) for a given thread.
 * **`stepping`**: Execute stepping actions (`stepIn`, `stepOut`, `stepBack`, `next`,
-  `continue`) in the
-  debug session.
-*   **`variables`**: Inspect variables within a specific scope or variable reference.
+  `continue`) in the debug session.
+* **`stepInTargets`**: Get all possible step-in targets for the current source
+  location.
+* **`threads`**: Retrieve a list of all active threads in the current DAP session.
+* **`variables`**: Inspect variables within a specific scope or variable reference.
 
 More features are on the way.
