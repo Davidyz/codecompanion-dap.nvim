@@ -87,11 +87,12 @@ Evaluates an expression in the context of the debuggee and returns its value.
         )
       end,
       ---@param agent CodeCompanion.Agent
-      success = function(_, agent, _, stdout)
+      success = function(_, agent, action, stdout)
         local result = stdout[#stdout].result
         local variablesReference = stdout[#stdout].variablesReference
         local output_message = string.format(
-          "**DAP Evaluate Tool**: Expression evaluated to: `%s`",
+          "**DAP Evaluate Tool**: Expression `%s` evaluated to: `%s`",
+          action.expression,
           tostring(result)
         )
 
