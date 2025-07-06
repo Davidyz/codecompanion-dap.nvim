@@ -9,6 +9,7 @@
 ---@class CodeCompanionDap.Opts
 ---@field tool_opts {CodeCompanionDap.ToolName: CodeCompanionDap.ToolOpts}
 ---@field collapse_tools boolean
+---@field interval_ms? integer
 local options = {
   tool_opts = {
     scopes = {},
@@ -19,6 +20,7 @@ local options = {
     variables = {},
   },
   collapse_tools = true,
+  interval_ms = 1000,
 }
 
 local Extension = {
@@ -49,6 +51,9 @@ local Extension = {
       tools = tool_group,
       description = "Some tools that expose a subset of the nvim-dap API to CodeCompanion.",
     }
+    require("codecompanion._extensions.dap.timer").setup({
+      interval_ms = options.interval_ms,
+    })
   end,
 }
 

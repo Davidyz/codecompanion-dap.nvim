@@ -38,6 +38,10 @@ Using `lazy.nvim`:
             prefer_filesystem = true,
           }
         }
+        -- interval between 2 DAP action.
+        -- set this to a larger value if you're hitting rate limits
+        -- from your LLM provider.
+        interval_ms = 1000, 
       }
     }
   }

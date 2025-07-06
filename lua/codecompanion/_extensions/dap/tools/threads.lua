@@ -1,6 +1,7 @@
 ---@module "codecompanion"
 ---@module "dap"
 
+local timer = require("codecompanion._extensions.dap.timer")
 local tool_name = "dap_threads"
 
 ---@param opts CodeCompanionDap.ToolOpts
@@ -28,12 +29,15 @@ The request retrieves a list of all threads in the current DAP session. Calling 
         if session == nil then
           return { status = "error", data = "Couldn't find a running session." }
         end
-        session:request("threads", {}, function(err, res)
-          if err == nil then
-            cb({ status = "success", data = res.threads })
-          else
-            cb({ status = "error", data = err.message })
-          end
+
+        timer.call(function()
+          session:request("threads", {}, function(err, res)
+            if err == nil then
+              cb({ status = "success", data = res.threads })
+            else
+              cb({ status = "error", data = err.message })
+            end
+          end)
         end)
       end,
     },

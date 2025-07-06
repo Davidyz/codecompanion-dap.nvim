@@ -1,6 +1,7 @@
 ---@module "codecompanion"
 ---@module "dap"
 
+local timer = require("codecompanion._extensions.dap.timer")
 local tool_name = "dap_variables"
 
 ---@param opts CodeCompanionDap.ToolOpts
@@ -62,12 +63,14 @@ The request retrieves the contents of a scope or variables reference.
           args.count = params.count
         end
 
-        session:request("variables", args, function(err, res)
-          if err == nil then
-            cb({ status = "success", data = res.variables })
-          else
-            cb({ status = "error", data = err.message })
-          end
+        timer.call(function()
+          session:request("variables", args, function(err, res)
+            if err == nil then
+              cb({ status = "success", data = res.variables })
+            else
+              cb({ status = "error", data = err.message })
+            end
+          end)
         end)
       end,
     },

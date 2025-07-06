@@ -1,6 +1,7 @@
 ---@module "codecompanion"
 ---@module "dap"
 
+local timer = require("codecompanion._extensions.dap.timer")
 local tool_name = "dap_source"
 
 ---@class CodeCompanionDap.SourceTool.Opts: CodeCompanionDap.ToolOpts
@@ -82,16 +83,18 @@ The request retrieves the content of a source file by source reference or path i
           }
         end
 
-        session:request("source", args, function(err, res)
-          if err == nil then
-            -- Pass both content and the original sourcePath (if provided)
-            cb({
-              status = "success",
-              data = { content = res.content, sourcePath = params.sourcePath },
-            })
-          else
-            cb({ status = "error", data = err.message })
-          end
+        timer.call(function()
+          session:request("source", args, function(err, res)
+            if err == nil then
+              -- Pass both content and the original sourcePath (if provided)
+              cb({
+                status = "success",
+                data = { content = res.content, sourcePath = params.sourcePath },
+              })
+            else
+              cb({ status = "error", data = err.message })
+            end
+          end)
         end)
       end,
     },

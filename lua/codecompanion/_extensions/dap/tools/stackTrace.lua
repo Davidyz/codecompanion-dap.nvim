@@ -1,6 +1,7 @@
 ---@module "codecompanion"
 ---@module "dap"
 
+local timer = require("codecompanion._extensions.dap.timer")
 local tool_name = "dap_stackTrace"
 
 ---@param opts CodeCompanionDap.ToolOpts
@@ -54,12 +55,14 @@ The request retrieves the call stack for a given thread in the current DAP sessi
           args.levels = params.levels
         end
 
-        session:request("stackTrace", args, function(err, res)
-          if err == nil then
-            cb({ status = "success", data = res.stackFrames })
-          else
-            cb({ status = "error", data = err.message })
-          end
+        timer.call(function()
+          session:request("stackTrace", args, function(err, res)
+            if err == nil then
+              cb({ status = "success", data = res.stackFrames })
+            else
+              cb({ status = "error", data = err.message })
+            end
+          end)
         end)
       end,
     },
