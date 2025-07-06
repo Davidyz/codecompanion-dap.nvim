@@ -12,7 +12,7 @@
 local options = {
   tool_opts = {
     breakpoints = {},
-    evaluate = {},
+    evaluate = { requires_approval = true },
     scopes = {},
     source = {},
     stackTrace = {},

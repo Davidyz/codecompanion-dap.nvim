@@ -70,6 +70,11 @@ Evaluates an expression in the context of the debuggee and returns its value.
     output = {
       ---@param self CodeCompanion.Agent.Tool
       ---@param agent CodeCompanion.Agent
+      prompt = function(self, agent)
+        return string.format("Evaluate `%s`?", self.args.expression)
+      end,
+      ---@param self CodeCompanion.Agent.Tool
+      ---@param agent CodeCompanion.Agent
       error = function(self, agent, _, stderr)
         if type(stderr) == "table" then
           stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
