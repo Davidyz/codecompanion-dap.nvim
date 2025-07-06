@@ -114,7 +114,7 @@ The request retrieves the content of a source file by source reference or path i
       end,
       ---@param agent CodeCompanion.Agent
       success = function(_, agent, _, stdout)
-        local response_data = stdout[1]
+        local response_data = stdout[#stdout]
         local source_content = response_data.content
         local source_path = response_data.sourcePath
 

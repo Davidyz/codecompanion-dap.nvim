@@ -127,7 +127,7 @@ Sets or lists breakpoints in the current DAP session.
         )
       end,
       success = function(_, agent, _, stdout)
-        local response_data = stdout[1]
+        local response_data = stdout[#stdout]
 
         local count = #response_data.breakpoints
 

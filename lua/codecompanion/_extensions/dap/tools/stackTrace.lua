@@ -81,7 +81,7 @@ The request retrieves the call stack for a given thread in the current DAP sessi
       end,
       ---@param agent CodeCompanion.Agent
       success = function(_, agent, _, stdout)
-        local stack_frames = stdout[1]
+        local stack_frames = stdout[#stdout]
         local num_frames = #stack_frames
         agent.chat:add_tool_output(
           agent.tool,

@@ -66,7 +66,7 @@ The request retrieves the scopes for a given stackframe in the current DAP sessi
       end,
       ---@param agent CodeCompanion.Agent
       success = function(_, agent, _, stdout)
-        local scopes = stdout[1]
+        local scopes = stdout[#stdout]
         local num_scopes = #scopes
         agent.chat:add_tool_output(
           agent.tool,

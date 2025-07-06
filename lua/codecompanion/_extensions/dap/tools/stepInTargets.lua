@@ -73,8 +73,11 @@ The request retrieves possible step-in targets for the current DAP session.
       success = function(_, agent, _, stdout)
         agent.chat:add_tool_output(
           agent.tool,
-          vim.json.encode(stdout[1]),
-          string.format("**DAP StepInTargets Tool**: Found %d target(s).", #stdout[1])
+          vim.json.encode(stdout[#stdout]),
+          string.format(
+            "**DAP StepInTargets Tool**: Found %d target(s).",
+            #stdout[#stdout]
+          )
         )
       end,
     },

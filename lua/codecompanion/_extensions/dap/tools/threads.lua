@@ -58,8 +58,8 @@ The request retrieves a list of all threads in the current DAP session. Calling 
       success = function(_, agent, _, stdout)
         agent.chat:add_tool_output(
           agent.tool,
-          vim.json.encode(stdout[1]),
-          string.format("**DAP Threads Tool**: Found %d thread(s).", #stdout[1])
+          vim.json.encode(stdout[#stdout]),
+          string.format("**DAP Threads Tool**: Found %d thread(s).", #stdout[#stdout])
         )
       end,
     },

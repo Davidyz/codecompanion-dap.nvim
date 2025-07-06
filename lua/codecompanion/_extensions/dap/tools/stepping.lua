@@ -107,7 +107,7 @@ The request provides stepping functionalities for the current DAP session.
         agent.chat:add_tool_output(
           agent.tool,
           stdout[1],
-          string.format("**DAP Stepping Tool**: %s", stdout[1])
+          string.format("**DAP Stepping Tool**: %s", stdout[#stdout])
         )
       end,
     },

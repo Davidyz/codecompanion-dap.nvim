@@ -89,7 +89,7 @@ The request retrieves the contents of a scope or variables reference.
       end,
       ---@param agent CodeCompanion.Agent
       success = function(_, agent, _, stdout)
-        local variables = stdout[1]
+        local variables = stdout[#stdout]
         local num_variables = #variables
         agent.chat:add_tool_output(
           agent.tool,
