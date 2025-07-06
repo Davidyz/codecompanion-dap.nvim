@@ -30,7 +30,7 @@ The request retrieves the content of a source file by source reference or path i
             },
             sourcePath = {
               type = "string",
-              description = "The path to the source file to retrieve content for. Use this if 'sourceReference' is not available, or if many sources with different paths share the same sourceReference.",
+              description = "The relative path to the source file to retrieve content for. Use this if 'sourceReference' is not available, or if many sources with different paths share the same sourceReference.",
             },
           },
           required = { "sourceReference" },
@@ -51,7 +51,8 @@ The request retrieves the content of a source file by source reference or path i
         local args = {}
         if params.sourceReference ~= nil then
           args.sourceReference = params.sourceReference
-        elseif params.sourcePath ~= nil then
+        end
+        if params.sourcePath ~= nil then
           local path = vim.fs.normalize(params.sourcePath)
           path = vim.fs.relpath(vim.uv.cwd() or ".", path) or path
           local stat = vim.uv.fs_stat(path)
