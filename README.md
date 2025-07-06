@@ -32,6 +32,9 @@ Using `lazy.nvim`:
         -- show the tool group instead of individual tools in the chat buffer
         collapse_tools = true,
         tool_opts = {
+          evaluate = {
+            requires_approval = true,
+          },
           source = {
             -- load the file content from the
             -- filesystem when possible.
@@ -70,3 +73,21 @@ Currently the following DAP requests are implemented:
 * **`variables`**: Inspect variables within a specific scope or variable reference.
 
 More features are on the way.
+
+# Configuration
+
+## Extension Options
+
+This extension involves **A LOT** of back and forth conversations. This means higher
+tokens per minute (TPM) and requests per minute (RPM). To mitigate this, you may
+use the `interval_ms` option to set the minimum delay between DAP requests. This
+helps avoid hitting rate limits from your LLM provider.
+
+## Tool Options
+All tools have the following config option available:
+- `requires_approval`: `true` to require user approval before running this tool.
+  Default: `true` for evaluate, `false` for others.
+
+The `source` tool has an extra option:
+- `prefer_filesystem`: `true` to load content from local file when possible, 
+  `false` to always load it from the DAP server. Default: `true`.
