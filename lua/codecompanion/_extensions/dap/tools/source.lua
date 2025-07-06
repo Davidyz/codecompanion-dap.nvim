@@ -75,7 +75,7 @@ The request retrieves the content of a source file by source reference or path i
               return { status = "error", data = err }
             end
           end
-          args.source = { path = params.sourcePath }
+          args.source = { path = path }
         else
           return {
             status = "error",
