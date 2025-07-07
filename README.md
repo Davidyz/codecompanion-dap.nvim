@@ -31,6 +31,9 @@ Using `lazy.nvim`:
       opts = {
         -- show the tool group instead of individual tools in the chat buffer
         collapse_tools = true,
+        interval_ms = 1000,
+        winfixbuf = true,
+
         tool_opts = {
           evaluate = {
             requires_approval = true,
@@ -41,10 +44,6 @@ Using `lazy.nvim`:
             prefer_filesystem = true,
           }
         }
-        -- interval between 2 DAP action.
-        -- set this to a larger value if you're hitting rate limits
-        -- from your LLM provider.
-        interval_ms = 1000, 
       }
     }
   }
@@ -78,10 +77,13 @@ More features are on the way.
 
 ## Extension Options
 
-This extension involves **A LOT** of back and forth conversations. This means higher
-tokens per minute (TPM) and requests per minute (RPM). To mitigate this, you may
-use the `interval_ms` option to set the minimum delay between DAP requests. This
-helps avoid hitting rate limits from your LLM provider.
+- **`interval_ms`**: This extension involves **A LOT** of back and forth conversations. 
+  This means higher tokens per minute (TPM) and requests per minute (RPM). To mitigate 
+  this, you may use the `interval_ms` option to set the minimum delay between DAP 
+  requests. This helps avoid hitting rate limits from your LLM provider.
+- **`winfixbuf`**: When set to true, the codecompanion window's `winfixbuf`
+  option will be enabled. When this is enabled, the DAP stepping actions won't
+  occupy the codecompanion chat buffer.
 
 ## Tool Options
 All tools have the following config option available:

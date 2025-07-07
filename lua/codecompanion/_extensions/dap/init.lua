@@ -9,6 +9,7 @@
 ---@field tool_opts {string: CodeCompanionDap.ToolOpts}
 ---@field collapse_tools boolean
 ---@field interval_ms? integer
+---@field winfixbuf? boolean
 local options = {
   tool_opts = {
     breakpoints = {},
@@ -23,6 +24,7 @@ local options = {
   },
   collapse_tools = true,
   interval_ms = 1000,
+  winfixbuf = true,
 }
 
 local Extension = {
@@ -59,6 +61,14 @@ local Extension = {
     require("codecompanion._extensions.dap.timer").setup({
       interval_ms = options.interval_ms,
     })
+    if options.winfixbuf then
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "codecompanion",
+        callback = function()
+          vim.wo.winfixbuf = true
+        end,
+      })
+    end
   end,
 }
 
