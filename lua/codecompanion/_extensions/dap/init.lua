@@ -62,8 +62,8 @@ local Extension = {
       interval_ms = options.interval_ms,
     })
     if options.winfixbuf then
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = "codecompanion",
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "CodeCompanionChatOpened",
         callback = function()
           vim.wo.winfixbuf = true
         end,
