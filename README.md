@@ -52,6 +52,19 @@ Using `lazy.nvim`:
 
 # Usage
 
+## Before You Start...
+
+Debugging (with DAP) is usually an interactive process. The developer sends some 
+requests to the DAP server, the server take some actions and send some data
+back. When we give this control to the LLM, it may end up (inevitably) send a lot 
+of requests to keep the LLM updated about the current DAP session. This means, if 
+you're using a provider with strict token per minute (TPM) or request per minute 
+(RPM) restrictions, you might hit that limit faster than you usually do. The
+`interval_ms` option helps, but it's probably not enough to solve this issue for
+good.
+
+## Tools
+
 After you've started a DAP session, you can use the tool group `@{dap}` in a chat 
 buffer to supply the tools from this extension to the LLM.
 
@@ -77,10 +90,9 @@ More features are on the way.
 
 ## Extension Options
 
-- **`interval_ms`**: This extension involves **A LOT** of back and forth conversations. 
-  This means higher tokens per minute (TPM) and requests per minute (RPM). To mitigate 
-  this, you may use the `interval_ms` option to set the minimum delay between DAP 
-  requests. This helps avoid hitting rate limits from your LLM provider.
+- **`interval_ms`**: To mitigate this, you may use the `interval_ms` option to set 
+  the minimum delay between DAP requests. This helps avoid hitting rate limits from 
+  your LLM provider.
 - **`winfixbuf`**: When set to true, the codecompanion window's `winfixbuf`
   option will be enabled. When this is enabled, the DAP stepping actions won't
   occupy the codecompanion chat buffer.
