@@ -21,6 +21,7 @@ return function(opts)
         name = tool_name,
         description = [[
 The request retrieves the content of a source file by source reference or path in the current DAP session.
+This shuld be the preferred method for fetching source code when you're in a DAP session, especially if the path came from a response from the DAP server.
 ]],
         parameters = {
           type = "object",
