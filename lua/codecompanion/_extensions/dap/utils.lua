@@ -12,7 +12,10 @@ function M.convert_path(data)
     end
   elseif type(data) == "table" then
     for k, v in pairs(data) do
-      if type(v) == "string" or type(v) == "table" then
+      if
+        (type(v) == "string" and type(k) == "string" and k:lower():find("path"))
+        or type(v) == "table"
+      then
         data[k] = M.convert_path(v)
       end
     end
