@@ -122,6 +122,15 @@ This shuld be the preferred method for fetching source code when you're in a DAP
 
         if source_path and source_path ~= "" then
           -- If a local file path was used, display only the path
+          local bufnr =
+            vim.uri_to_bufnr(vim.uri_from_fname(vim.fs.abspath(source_path)))
+          agent.chat.references:add({
+            bufnr = bufnr,
+            source = tool_name,
+            id = source_path,
+            path = source_path,
+            opts = { watched = true },
+          })
           agent.chat:add_tool_output(
             agent.tool,
             source_content,
