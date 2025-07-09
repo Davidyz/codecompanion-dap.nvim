@@ -18,6 +18,8 @@ return function(opts)
         name = tool_name,
         description = [[
 The request retrieves possible step-in targets for the current DAP session.
+When you need to investigate the behaviour of a particular symbol (function, class, etc.),
+you may use this tool to find out whether you can step into it's implementation.
 ]],
         parameters = {
           type = "object",
