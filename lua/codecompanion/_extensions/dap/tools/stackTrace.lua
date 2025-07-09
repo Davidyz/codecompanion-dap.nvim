@@ -41,6 +41,7 @@ Empty results indicates that the results are unchanged.
               description = "The maximum number of frames to return. If omitted, all frames are returned.",
             },
           },
+          required = { "threadId" },
         },
       },
     },
