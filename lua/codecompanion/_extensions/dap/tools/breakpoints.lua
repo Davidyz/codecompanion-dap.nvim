@@ -9,6 +9,9 @@ local tool_name = "dap_breakpoints"
 ---@return CodeCompanion.Agent.Tool
 return function(opts)
   opts = vim.tbl_deep_extend("force", {}, opts or {})
+  local scratch_buf_manager = require("codecompanion._extensions.dap.scratch_buf").new({
+    bufname_prefix = "breakpoints",
+  })
   ---@type CodeCompanion.Agent.Tool|{}
   return {
     name = tool_name,
@@ -18,9 +21,9 @@ return function(opts)
         name = tool_name,
         description = [[
 Sets or lists breakpoints in the current DAP session.
-- To set breakpoints: provide the 'source' and 'breakpoints' arguments. The 'breakpoints' argument is a list of objects, each with a 'line' number.
+- To set breakpoints: provide the 'source' and 'breakpoints' arguments. The 'breakpoints' argument is a list of objects, each with a 'line' number. You may use the other dap tools (such as stackTrace) to find out the appropriate values.
 - To clear all breakpoints in a file: provide 'source' and an empty 'breakpoints' list.
-- To list all active breakpoints: call the tool with no arguments.
+- To list all active breakpoints in a file: call the tool with the corresponding path, and omit the `breakpoints` parameter.
 ]],
         parameters = {
           type = "object",
@@ -38,7 +41,7 @@ Sets or lists breakpoints in the current DAP session.
             },
             breakpoints = {
               type = "array",
-              description = "A list of breakpoints to set. Set this argument to `null` to list all existing breakpoints. Pass an empty array to clear existing breakpoints.",
+              description = "A list of breakpoints to set. Omit this argument to list all existing breakpoints. Pass an empty array to clear existing breakpoints.",
               items = {
                 type = "object",
                 properties = {
@@ -69,6 +72,40 @@ Sets or lists breakpoints in the current DAP session.
     },
     cmds = {
       function(_, params, _, cb)
+        if params.source == nil or params.source.path == nil then
+          return {
+            status = "error",
+            data = "The 'source' argument with a 'path' is required when setting breakpoints.",
+          }
+        end
+
+        local path = vim.fs.normalize(params.source.path)
+        path = vim.fs.relpath(vim.uv.cwd() or ".", path) or path
+        local stat = vim.uv.fs_stat(path)
+        if stat == nil or stat.type == "directory" then
+          return {
+            status = "error",
+            data = string.format("`%s` is a directory, not a path.", path),
+          }
+        end
+
+        if params.breakpoints == nil then
+          -- getter mode
+          local bufnr = vim.uri_to_bufnr(vim.uri_from_fname(vim.fs.abspath(path)))
+          return {
+            status = "success",
+            data = {
+              source = { path = path },
+              breakpoints = require("dap.breakpoints").get()[bufnr],
+            },
+          }
+        end
+
+        local args = {
+          source = { path = path },
+          breakpoints = params.breakpoints,
+        }
+
         local ok, dap = pcall(require, "dap")
         if not ok then
           return { status = "error", data = "nvim-dap not found." }
@@ -82,22 +119,6 @@ Sets or lists breakpoints in the current DAP session.
           }
         end
 
-        if params.source == nil or params.source.path == nil then
-          return {
-            status = "error",
-            data = "The 'source' argument with a 'path' is required when setting breakpoints.",
-          }
-        end
-
-        local path = vim.fs.normalize(params.source.path)
-        path = vim.fs.relpath(vim.uv.cwd() or ".", path) or path
-
-        local args = {
-          source = { path = path },
-          breakpoints = params.breakpoints or {},
-        }
-
-        -- This is an asynchronous request to the DAP server.
         timer.call(function()
           session:request("setBreakpoints", args, function(err, res)
             if err == nil then
@@ -127,41 +148,62 @@ Sets or lists breakpoints in the current DAP session.
           string.format("**DAP Breakpoints Tool**: Failed with error:\n%s", stderr)
         )
       end,
-      success = function(_, agent, _, stdout)
+      ---@param agent CodeCompanion.Agent
+      success = function(_, agent, cmd, stdout)
         local response_data = utils.convert_path(stdout[#stdout])
+        local dap = require("dap")
 
-        local count = #response_data.breakpoints
+        local session = dap.session()
+        if session == nil then
+          return agent.chat:add_tool_output(
+            agent.tool,
+            "The DAP session is no longer active."
+          )
+        end
 
-        -- Check if we were setting breakpoints or listing them
-        if response_data.source and response_data.source.path then
-          local message
-          if count > 0 then
-            message = string.format(
+        local lines = vim
+          .iter(response_data.breakpoints or {})
+          :map(function(bp)
+            return vim.trim(vim.json.encode(bp))
+          end)
+          :totable()
+
+        scratch_buf_manager:update(session, agent.chat, lines)
+
+        local primary_message
+        if response_data.breakpoints == nil then
+          primary_message = "**DAP Breakpoints Tool**: No breakpoints were found."
+        else
+          local count = #response_data.breakpoints
+          if cmd.breakpoints == nil then
+            -- getter mode
+            primary_message = string.format(
+              "**DAP Breakpoints Tool**: Found %d breakpoint(s) in %s.",
+              count,
+              response_data.source.path
+            )
+          elseif count > 0 then
+            primary_message = string.format(
               "**DAP Breakpoints Tool**: Successfully set %d verified breakpoints in %s.",
               count,
               response_data.source.path
             )
-          else
-            message = string.format(
+          elseif count == 0 then
+            primary_message = string.format(
               "**DAP Breakpoints Tool**: Cleared all breakpoints in %s.",
               response_data.source.path
             )
           end
-          agent.chat:add_tool_output(
-            agent.tool,
-            vim.json.encode(response_data),
-            message
-          )
-        else
-          agent.chat:add_tool_output(
-            agent.tool,
-            vim.json.encode(response_data),
-            string.format(
-              "**DAP Breakpoints Tool**: Found %d active breakpoints.",
-              count
-            )
-          )
         end
+
+        agent.chat:add_tool_output(
+          agent.tool,
+          string.format(
+            "The breakpoints are available in the buffer named `%s`.",
+            scratch_buf_manager:get_readable_bufname(session)
+          ),
+          primary_message
+        )
       end,
     },
   }

@@ -39,7 +39,7 @@ end
 ---@return string
 function ScratchBufManager:get_readable_bufname(session)
   self:get_bufnr(session)
-  return string.format("%s %d", self.bufname_prefix, session.id)
+  return string.format("%s (session %d)", self.bufname_prefix, session.id)
 end
 
 ---@param session dap.Session
@@ -57,10 +57,6 @@ end
 ---@param chat CodeCompanion.Chat
 ---@param content string[]
 function ScratchBufManager:update(dap_session, chat, content)
-  if content == nil or vim.tbl_isempty(content) then
-    return
-  end
-
   local bufnr = self:get_bufnr(dap_session)
   local buf_name = self:get_readable_bufname(dap_session)
 
