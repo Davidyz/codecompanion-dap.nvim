@@ -5,9 +5,10 @@ local tool_name = "dap_stepInTargets"
 local timer = require("codecompanion._extensions.dap.timer")
 local utils = require("codecompanion._extensions.dap.utils")
 
----@param opts CodeCompanionDap.ToolOpts
----@return CodeCompanion.Agent.Tool
 return function(opts)
+  local scratch_buf_manager = require("codecompanion._extensions.dap.scratch_buf").new({
+    bufname_prefix = "stepInTargets",
+  })
   ---@type CodeCompanion.Agent.Tool|{}
   return {
     name = tool_name,
@@ -51,7 +52,7 @@ The request retrieves possible step-in targets for the current DAP session.
             if err == nil then
               cb({
                 status = "success",
-                data = utils.convert_path(res.targets) or {},
+                data = utils.convert_path(res.targets),
               })
             else
               cb({ status = "error", data = err.message })
@@ -75,13 +76,34 @@ The request retrieves possible step-in targets for the current DAP session.
       end,
       ---@param agent CodeCompanion.Agent
       success = function(_, agent, _, stdout)
+        local targets = stdout[#stdout]
+        local dap = require("dap")
+
+        local lines = vim
+          .iter(targets)
+          :map(function(target)
+            return vim.trim(vim.json.encode(target))
+          end)
+          :totable()
+
+        local session = dap.session()
+        if session == nil then
+          return agent.chat:add_tool_output(
+            agent.tool,
+            "The DAP session is no longer active."
+          )
+        end
+
+        scratch_buf_manager:update(session, agent.chat, lines)
+
+        local num_targets = #targets
         agent.chat:add_tool_output(
           agent.tool,
-          vim.json.encode(stdout[#stdout]),
           string.format(
-            "**DAP StepInTargets Tool**: Found %d target(s).",
-            #stdout[#stdout]
-          )
+            "The step-in targets are available in the buffer named `%s`.",
+            scratch_buf_manager:get_readable_bufname(session)
+          ),
+          string.format("**DAP StepInTargets Tool**: Found %d target(s).", num_targets)
         )
       end,
     },
