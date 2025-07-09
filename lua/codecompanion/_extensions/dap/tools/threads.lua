@@ -8,6 +8,9 @@ local tool_name = "dap_threads"
 ---@param opts CodeCompanionDap.ToolOpts
 ---@return CodeCompanion.Agent.Tool
 return function(opts)
+  local scratch_buf_manager = require("codecompanion._extensions.dap.scratch_buf").new({
+    bufname_prefix = "threads",
+  })
   ---@type CodeCompanion.Agent.Tool|{}
   return {
     name = tool_name,
@@ -57,10 +60,34 @@ The request retrieves a list of all threads in the current DAP session. Calling 
       end,
       ---@param agent CodeCompanion.Agent
       success = function(_, agent, _, stdout)
+        local threads = stdout[#stdout]
+        local dap = require("dap")
+
+        local lines = vim
+          .iter(threads)
+          :map(function(thread)
+            return vim.trim(vim.json.encode(thread))
+          end)
+          :totable()
+
+        local session = dap.session()
+        if session == nil then
+          return agent.chat:add_tool_output(
+            agent.tool,
+            "The DAP session is no longer active."
+          )
+        end
+
+        scratch_buf_manager:update(session, agent.chat, lines)
+
+        local num_threads = #threads
         agent.chat:add_tool_output(
           agent.tool,
-          vim.json.encode(stdout[#stdout]),
-          string.format("**DAP Threads Tool**: Found %d thread(s).", #stdout[#stdout])
+          string.format(
+            "The threads are available in the buffer named `%s`.",
+            scratch_buf_manager:get_readable_bufname(session)
+          ),
+          string.format("**DAP Threads Tool**: Found %d thread(s).", num_threads)
         )
       end,
     },
