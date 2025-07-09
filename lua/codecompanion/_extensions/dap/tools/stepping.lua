@@ -16,6 +16,8 @@ return function(opts)
         name = tool_name,
         description = [[
 The request provides stepping functionalities for the current DAP session.
+Each `stepping` call should be followed by a `stackTrace` call using the current `threadId` to verify whether the stepping worked as intended.
+Try to call `stackTrace` in the same response as the `stepping` call.
 ]],
         parameters = {
           type = "object",
