@@ -3,11 +3,15 @@
 
 local timer = require("codecompanion._extensions.dap.timer")
 local utils = require("codecompanion._extensions.dap.utils")
+
 local tool_name = "dap_stackTrace"
 
 ---@param opts CodeCompanionDap.ToolOpts
 ---@return CodeCompanion.Agent.Tool
 return function(opts)
+  local scratch_buf_manager = require("codecompanion._extensions.dap.scratch_buf").new({
+    bufname_prefix = "stackTrace",
+  })
   ---@type CodeCompanion.Agent.Tool|{}
   return {
     name = tool_name,
@@ -17,6 +21,9 @@ return function(opts)
         name = tool_name,
         description = [[
 The request retrieves the call stack for a given thread in the current DAP session.
+For a DAP session, the first call to this tool will contain the full stacktrace results.
+The subsequent calls will return the changes to the results.
+Empty results indicates that the results are unchanged.
 ]],
         parameters = {
           type = "object",
@@ -83,10 +90,32 @@ The request retrieves the call stack for a given thread in the current DAP sessi
       ---@param agent CodeCompanion.Agent
       success = function(_, agent, _, stdout)
         local stack_frames = stdout[#stdout]
+        local dap = require("dap")
+
+        local lines = vim
+          .iter(stack_frames)
+          :map(function(frame)
+            return vim.trim(vim.json.encode(frame))
+          end)
+          :totable()
+
+        local session = dap.session()
+        if session == nil then
+          return agent.chat:add_tool_output(
+            agent.tool,
+            "The DAP session is no longer active."
+          )
+        end
+
+        scratch_buf_manager:update(session, agent.chat, lines)
+
         local num_frames = #stack_frames
         agent.chat:add_tool_output(
           agent.tool,
-          vim.json.encode(stack_frames),
+          string.format(
+            "The stack frames are available in the buffer named `%s`.",
+            scratch_buf_manager:get_readable_bufname(session)
+          ),
           string.format(
             "**DAP Stack Trace Tool**: Found %d stack frame(s).",
             num_frames
