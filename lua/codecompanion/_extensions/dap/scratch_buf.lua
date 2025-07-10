@@ -30,6 +30,25 @@ ONLY USE THE INFORMATION FROM THIS BUFFER TO ASSIST YOUR TASK.
   }, opts or {})
 
   opts.prefix = vim.trim(opts.prefix)
+
+  vim.api.nvim_create_autocmd("User", {
+    pattern = "CodeCompanionDapSessionTerminated",
+    callback = function(args)
+      local session_id = args.data.session_id
+      local bufnr = opts.session_to_buf[session_id]
+      if bufnr then
+        vim.api.nvim_buf_set_lines(
+          bufnr,
+          0,
+          -1,
+          false,
+          { string.format("Session %d has terminated", session_id) }
+        )
+        -- NOTE: we can't do the following because it'll break the watcher.
+        -- pcall(vim.api.nvim_buf_delete, bufnr, { unload = false, force = true })
+      end
+    end,
+  })
   return setmetatable(opts, { __index = ScratchBufManager })
 end
 
