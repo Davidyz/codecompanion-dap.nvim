@@ -66,6 +66,16 @@ If you need to call stepIn, call `stepInTargets` first to verify the stepIn is p
             ),
           }
         end
+        if params.threadId == nil or session.threads[params.threadId] == nil then
+          return {
+            status = "error",
+            data = string.format(
+              "Invalid threadId: '%d'. Should be one of `%s`",
+              params.threadId,
+              table.concat(vim.tbl_keys(session.threads), ", ")
+            ),
+          }
+        end
 
         local args = vim.empty_dict()
         if params.threadId ~= nil then

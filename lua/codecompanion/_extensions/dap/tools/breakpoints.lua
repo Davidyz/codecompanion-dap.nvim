@@ -82,7 +82,15 @@ Sets or lists breakpoints in the current DAP session.
         local path = vim.fs.normalize(params.source.path)
         path = vim.fs.relpath(vim.uv.cwd() or ".", path) or path
         local stat = vim.uv.fs_stat(path)
-        if stat == nil or stat.type == "directory" then
+        if stat == nil then
+          return {
+            status = "error",
+            data = string.format(
+              "`%s` does not exist. Call other dap tools to find out the appropriate path, or ask the user for a path.",
+              path
+            ),
+          }
+        elseif stat.type == "directory" then
           return {
             status = "error",
             data = string.format("`%s` is a directory, not a path.", path),
