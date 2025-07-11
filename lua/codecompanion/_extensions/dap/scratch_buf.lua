@@ -26,6 +26,7 @@ function ScratchBufManager.new(opts)
 The user WILL NOT see this buffer.
 DO NOT MENTION THE PATH OR THE NAME OF THIS BUFFER TO THE USER.
 ONLY USE THE INFORMATION FROM THIS BUFFER TO ASSIST YOUR TASK.
+THE REMOVAL OF THIS BUFFER MEANS THAT THE RESOURCES RECORDED IN THIS BUFFER ARE NO LONGER AVAILABLE.
 ]],
   }, opts or {})
 
@@ -37,15 +38,11 @@ ONLY USE THE INFORMATION FROM THIS BUFFER TO ASSIST YOUR TASK.
       local session_id = args.data.session_id
       local bufnr = opts.session_to_buf[session_id]
       if bufnr then
-        vim.api.nvim_buf_set_lines(
+        pcall(
+          vim.schedule_wrap(vim.api.nvim_buf_delete),
           bufnr,
-          0,
-          -1,
-          false,
-          { string.format("Session %d has terminated", session_id) }
+          { unload = false, force = true }
         )
-        -- NOTE: we can't do the following because it'll break the watcher.
-        -- pcall(vim.api.nvim_buf_delete, bufnr, { unload = false, force = true })
       end
     end,
   })
