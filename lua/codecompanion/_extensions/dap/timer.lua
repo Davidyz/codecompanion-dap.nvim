@@ -20,7 +20,7 @@ end
 ---@param fun function
 function M.call(fun)
   local curr_time = get_curr_time_ms()
-  if last_req == nil then
+  if last_req == nil or timer_opts.interval_ms <= 0 then
     last_req = curr_time
     fun()
     return
