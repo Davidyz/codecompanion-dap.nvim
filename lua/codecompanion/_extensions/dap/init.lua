@@ -19,6 +19,7 @@ local options = {
     stackTrace = {},
     stepping = {},
     stepInTargets = {},
+    stopped_at = {},
     threads = {},
     variables = {},
   },
@@ -72,11 +73,20 @@ local Extension = {
 
     require("dap").listeners.after["event_terminated"]["codecompanion-dap"] = function(
       session,
-      event
+      _
     )
       vim.api.nvim_exec_autocmds("User", {
         pattern = "CodeCompanionDapSessionTerminated",
         data = { session_id = session.id },
+      })
+    end
+    require("dap").listeners.after["event_stopped"]["codecompanion-dap"] = function(
+      session,
+      event
+    )
+      vim.api.nvim_exec_autocmds("User", {
+        pattern = "CodeCompanionDapSessionStopped",
+        data = { session_id = session.id, event = event },
       })
     end
   end,
