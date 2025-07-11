@@ -20,6 +20,7 @@ return function(opts)
         name = tool_name,
         description = [[
 The request retrieves a list of all threads in the current DAP session. Calling it once will return all ongoing threads.
+This should be called before you're calling another dap tool that requires `threadId` as a parameter.
   ]],
       },
     },

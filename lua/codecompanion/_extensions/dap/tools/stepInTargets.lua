@@ -19,7 +19,7 @@ return function(opts)
         description = [[
 The request retrieves possible step-in targets for the current DAP session.
 When you need to investigate the behaviour of a particular symbol (function, class, etc.),
-you may use this tool to find out whether you can step into it's implementation.
+you should use this tool to find out whether you can step into it's implementation before calling the stepping tool.
 ]],
         parameters = {
           type = "object",

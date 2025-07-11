@@ -17,6 +17,7 @@ return function(opts)
         name = tool_name,
         description = [[
 The request retrieves the contents of a scope or variables reference.
+Call the scopes tool before this to obtain the value of `variablesReference` to be used as the parameter of this tool.
 ]],
         parameters = {
           type = "object",

@@ -18,6 +18,7 @@ return function(opts)
 The request provides stepping functionalities for the current DAP session.
 Each `stepping` call should be followed by a `stackTrace` call using the current `threadId` to verify whether the stepping worked as intended.
 The `stackTrace` call should be in the same request as the `stepping` call if possible.
+If you need to call stepIn, call `stepInTargets` first to verify the stepIn is possible.
 ]],
         parameters = {
           type = "object",

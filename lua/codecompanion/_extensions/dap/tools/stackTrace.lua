@@ -24,6 +24,7 @@ The request retrieves the call stack for a given thread in the current DAP sessi
 For a DAP session, the first call to this tool will contain the full stacktrace results.
 The subsequent calls will return the changes to the results.
 Empty results indicates that the results are unchanged.
+This tool should be called before you're calling any dap tools that requires `frameId` as a parameter.
 ]],
         parameters = {
           type = "object",
