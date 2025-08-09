@@ -6,9 +6,9 @@ local utils = require("codecompanion._extensions.dap.utils")
 local tool_name = "dap_scopes"
 
 ---@param opts CodeCompanionDap.ToolOpts
----@return CodeCompanion.Agent.Tool
+---@return CodeCompanion.Tools.Tool
 return function(opts)
-  ---@type CodeCompanion.Agent.Tool|{}
+  ---@type CodeCompanion.Tools.Tool|{}
   return {
     name = tool_name,
     schema = {
@@ -53,24 +53,24 @@ The request retrieves the scopes for a given stackframe in the current DAP sessi
       end,
     },
     output = {
-      ---@param self CodeCompanion.Agent.Tool
-      ---@param agent CodeCompanion.Agent
-      error = function(self, agent, _, stderr)
+      ---@param self CodeCompanion.Tools.Tool
+      ---@param tools CodeCompanion.Tools
+      error = function(self, tools, _, stderr)
         if type(stderr) == "table" then
           stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
         end
-        agent.chat:add_tool_output(
+        tools.chat:add_tool_output(
           self,
           stderr,
           string.format("**DAP Scopes Tool**: Failed with error:\n%s", stderr)
         )
       end,
-      ---@param agent CodeCompanion.Agent
-      success = function(_, agent, _, stdout)
+      ---@param tools CodeCompanion.Tools
+      success = function(_, tools, _, stdout)
         local scopes = stdout[#stdout]
         local num_scopes = #scopes
-        agent.chat:add_tool_output(
-          agent.tool,
+        tools.chat:add_tool_output(
+          tools.tool,
           vim.json.encode(scopes),
           string.format("**DAP Scopes Tool**: Found %d scope(s).", num_scopes)
         )

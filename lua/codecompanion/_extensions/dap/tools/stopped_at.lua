@@ -1,15 +1,13 @@
 ---@module "codecompanion"
 ---@module "dap"
 
-local timer = require("codecompanion._extensions.dap.timer")
-local utils = require("codecompanion._extensions.dap.utils")
 local tool_name = "dap_stopped_at"
 
 ---@type table<integer, dap.StoppedEvent>
 local stopped_at_data = {}
 
 ---@param opts CodeCompanionDap.ToolOpts
----@return CodeCompanion.Agent.Tool
+---@return CodeCompanion.Tools.Tool
 return function(opts)
   vim.api.nvim_create_autocmd("User", {
     pattern = "CodeCompanionDapSessionStopped",
@@ -18,7 +16,7 @@ return function(opts)
     end,
   })
 
-  ---@type CodeCompanion.Agent.Tool|{}
+  ---@type CodeCompanion.Tools.Tool|{}
   return {
     name = tool_name,
     schema = {
@@ -30,6 +28,12 @@ Returns the current position that the debugee is stopped at, as well as the reas
 CALL THIS TOOL AFTER RECIEVING A USER INSTRUCTION, OR AFTER CALLING THE `dap_stepping` TOOL.
 If this tool fails to return the info, you may try to call the `stepInto` request in `dap_stepping` to trigger the update, unless the user instructed otherwise.
   ]],
+        parameters = {
+          type = "object",
+          properties = vim.empty_dict(),
+          required = {},
+          additionalProperties = false,
+        },
       },
     },
     cmds = {
@@ -38,23 +42,23 @@ If this tool fails to return the info, you may try to call the `stepInto` reques
       end,
     },
     output = {
-      ---@param agent CodeCompanion.Agent
-      success = function(_, agent, _, _)
+      ---@param tools CodeCompanion.Tools
+      success = function(_, tools, _, _)
         local dap = require("dap")
         local session = dap.session()
         if session == nil then
-          return agent.chat:add_tool_output(
-            agent.tool,
+          return tools.chat:add_tool_output(
+            tools.tool,
             "The DAP session is no longer active."
           )
         end
 
         if stopped_at_data[session.id] == nil then
-          return agent.chat:add_tool_output(agent.tool, "Unable to find the stop info.")
+          return tools.chat:add_tool_output(tools.tool, "Unable to find the stop info.")
         end
 
-        agent.chat:add_tool_output(
-          agent.tool,
+        tools.chat:add_tool_output(
+          tools.tool,
           vim.json.encode(stopped_at_data[session.id]),
           string.format(
             "The debuggee is stopped due to `%s`.",

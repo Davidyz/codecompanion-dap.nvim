@@ -6,9 +6,9 @@ local utils = require("codecompanion._extensions.dap.utils")
 local tool_name = "dap_evaluate"
 
 ---@param opts CodeCompanionDap.ToolOpts
----@return CodeCompanion.Agent.Tool
+---@return CodeCompanion.Tools.Tool
 return function(opts)
-  ---@type CodeCompanion.Agent.Tool|{}
+  ---@type CodeCompanion.Tools.Tool|{}
   return {
     name = tool_name,
     schema = {
@@ -69,25 +69,25 @@ Evaluates an expression in the context of the debuggee and returns its value.
       end,
     },
     output = {
-      ---@param self CodeCompanion.Agent.Tool
-      ---@param agent CodeCompanion.Agent
-      prompt = function(self, agent)
+      ---@param self CodeCompanion.Tools.Tool
+      ---@param tools CodeCompanion.Tools
+      prompt = function(self, tools)
         return string.format("Evaluate `%s`?", self.args.expression)
       end,
-      ---@param self CodeCompanion.Agent.Tool
-      ---@param agent CodeCompanion.Agent
-      error = function(self, agent, _, stderr)
+      ---@param self CodeCompanion.Tools.Tool
+      ---@param tools CodeCompanion.Tools
+      error = function(self, tools, _, stderr)
         if type(stderr) == "table" then
           stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
         end
-        agent.chat:add_tool_output(
+        tools.chat:add_tool_output(
           self,
           stderr,
           string.format("**DAP Evaluate Tool**: Failed with error:\n%s", stderr)
         )
       end,
-      ---@param agent CodeCompanion.Agent
-      success = function(_, agent, action, stdout)
+      ---@param tools CodeCompanion.Tools
+      success = function(_, tools, action, stdout)
         local result = stdout[#stdout].result
         local variablesReference = stdout[#stdout].variablesReference
         local output_message = string.format(
@@ -101,8 +101,8 @@ Evaluates an expression in the context of the debuggee and returns its value.
             .. string.format(" (variablesReference: %d)", variablesReference)
         end
 
-        agent.chat:add_tool_output(
-          agent.tool,
+        tools.chat:add_tool_output(
+          tools.tool,
           vim.json.encode(stdout[#stdout]),
           output_message
         )

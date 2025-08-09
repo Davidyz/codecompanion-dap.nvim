@@ -6,13 +6,13 @@ local utils = require("codecompanion._extensions.dap.utils")
 local tool_name = "dap_breakpoints"
 
 ---@param opts CodeCompanionDap.ToolOpts
----@return CodeCompanion.Agent.Tool
+---@return CodeCompanion.Tools.Tool
 return function(opts)
   opts = vim.tbl_deep_extend("force", {}, opts or {})
   local scratch_buf_manager = require("codecompanion._extensions.dap.scratch_buf").new({
     bufname_prefix = "breakpoints",
   })
-  ---@type CodeCompanion.Agent.Tool|{}
+  ---@type CodeCompanion.Tools.Tool|{}
   return {
     name = tool_name,
     schema = {
@@ -146,25 +146,27 @@ Sets or lists breakpoints in the current DAP session.
       end,
     },
     output = {
-      error = function(self, agent, _, stderr)
+      ---@param self CodeCompanion.Tools.Tool
+      ---@param tools CodeCompanion.Tools
+      error = function(self, tools, _, stderr)
         if type(stderr) == "table" then
           stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
         end
-        agent.chat:add_tool_output(
+        tools.chat:add_tool_output(
           self,
           stderr,
           string.format("**DAP Breakpoints Tool**: Failed with error:\n%s", stderr)
         )
       end,
-      ---@param agent CodeCompanion.Agent
-      success = function(_, agent, cmd, stdout)
+      ---@param tools CodeCompanion.Tools
+      success = function(_, tools, cmd, stdout)
         local response_data = utils.convert_path(stdout[#stdout])
         local dap = require("dap")
 
         local session = dap.session()
         if session == nil then
-          return agent.chat:add_tool_output(
-            agent.tool,
+          return tools.chat:add_tool_output(
+            tools.tool,
             "The DAP session is no longer active."
           )
         end
@@ -176,7 +178,7 @@ Sets or lists breakpoints in the current DAP session.
           end)
           :totable()
 
-        scratch_buf_manager:update(session, agent.chat, lines)
+        scratch_buf_manager:update(session, tools.chat, lines)
 
         local primary_message
         if response_data.breakpoints == nil then
@@ -204,8 +206,8 @@ Sets or lists breakpoints in the current DAP session.
           end
         end
 
-        agent.chat:add_tool_output(
-          agent.tool,
+        tools.chat:add_tool_output(
+          tools.tool,
           string.format(
             "The breakpoints are available in the buffer named `%s`.",
             scratch_buf_manager:get_readable_bufname(session)

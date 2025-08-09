@@ -9,7 +9,7 @@ return function(opts)
   local scratch_buf_manager = require("codecompanion._extensions.dap.scratch_buf").new({
     bufname_prefix = "stepInTargets",
   })
-  ---@type CodeCompanion.Agent.Tool|{}
+  ---@type CodeCompanion.Tools.Tool|{}
   return {
     name = tool_name,
     schema = {
@@ -64,20 +64,20 @@ you should use this tool to find out whether you can step into it's implementati
       end,
     },
     output = {
-      ---@param self CodeCompanion.Agent.Tool
-      ---@param agent CodeCompanion.Agent
-      error = function(self, agent, _, stderr)
+      ---@param self CodeCompanion.Tools.Tool
+      ---@param tools CodeCompanion.Tools
+      error = function(self, tools, _, stderr)
         if type(stderr) == "table" then
           stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
         end
-        agent.chat:add_tool_output(
+        tools.chat:add_tool_output(
           self,
           stderr,
           string.format("**DAP StepInTargets Tool**: Failed with error:\n%s", stderr)
         )
       end,
-      ---@param agent CodeCompanion.Agent
-      success = function(_, agent, _, stdout)
+      ---@param tools CodeCompanion.Tools
+      success = function(_, tools, _, stdout)
         local targets = stdout[#stdout]
         local dap = require("dap")
 
@@ -90,17 +90,17 @@ you should use this tool to find out whether you can step into it's implementati
 
         local session = dap.session()
         if session == nil then
-          return agent.chat:add_tool_output(
-            agent.tool,
+          return tools.chat:add_tool_output(
+            tools.tool,
             "The DAP session is no longer active."
           )
         end
 
-        scratch_buf_manager:update(session, agent.chat, lines)
+        scratch_buf_manager:update(session, tools.chat, lines)
 
         local num_targets = #targets
-        agent.chat:add_tool_output(
-          agent.tool,
+        tools.chat:add_tool_output(
+          tools.tool,
           string.format(
             "The step-in targets are available in the buffer named `%s`.",
             scratch_buf_manager:get_readable_bufname(session)

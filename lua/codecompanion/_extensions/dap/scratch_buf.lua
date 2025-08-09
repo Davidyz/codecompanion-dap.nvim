@@ -77,11 +77,11 @@ function ScratchBufManager:update(dap_session, chat, content)
   local buf_name = self:get_readable_bufname(dap_session)
 
   if
-    not vim.iter(chat.refs or {}):any(function(item)
+    not vim.iter(chat.context_items or {}):any(function(item)
       return item and item.source == buf_name
     end)
   then
-    chat.references:add({
+    chat.context:add({
       bufnr = bufnr,
       source = buf_name,
       opts = {

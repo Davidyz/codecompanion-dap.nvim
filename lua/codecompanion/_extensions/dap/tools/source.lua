@@ -9,10 +9,10 @@ local tool_name = "dap_source"
 ---@field prefer_filesystem boolean
 
 ---@param opts CodeCompanionDap.SourceTool.Opts
----@return CodeCompanion.Agent.Tool
+---@return CodeCompanion.Tools.Tool
 return function(opts)
   opts = vim.tbl_deep_extend("force", { prefer_filesystem = true }, opts or {})
-  ---@type CodeCompanion.Agent.Tool|{}
+  ---@type CodeCompanion.Tools.Tool|{}
   return {
     name = tool_name,
     schema = {
@@ -102,20 +102,20 @@ This shuld be the preferred method for fetching source code when you're in a DAP
       end,
     },
     output = {
-      ---@param self CodeCompanion.Agent.Tool
-      ---@param agent CodeCompanion.Agent
-      error = function(self, agent, _, stderr)
+      ---@param self CodeCompanion.Tools.Tool
+      ---@param tools CodeCompanion.Tools
+      error = function(self, tools, _, stderr)
         if type(stderr) == "table" then
           stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
         end
-        agent.chat:add_tool_output(
+        tools.chat:add_tool_output(
           self,
           stderr,
           string.format("**DAP Source Tool**: Failed with error:\n%s", stderr)
         )
       end,
-      ---@param agent CodeCompanion.Agent
-      success = function(_, agent, _, stdout)
+      ---@param tools CodeCompanion.Tools
+      success = function(_, tools, _, stdout)
         local response_data = utils.convert_path(stdout[#stdout])
         local source_content = response_data.content
         local source_path = response_data.sourcePath
@@ -124,15 +124,15 @@ This shuld be the preferred method for fetching source code when you're in a DAP
           -- If a local file path was used, display only the path
           local bufnr =
             vim.uri_to_bufnr(vim.uri_from_fname(vim.fs.abspath(source_path)))
-          agent.chat.references:add({
+          tools.chat.context:add({
             bufnr = bufnr,
             source = tool_name,
             id = source_path,
             path = source_path,
             opts = { watched = true },
           })
-          agent.chat:add_tool_output(
-            agent.tool,
+          tools.chat:add_tool_output(
+            tools.tool,
             source_content,
             string.format(
               "**DAP Source Tool**: Successfully retrieved source from path: `%s`",
@@ -141,8 +141,8 @@ This shuld be the preferred method for fetching source code when you're in a DAP
           )
         else
           -- If sourceReference was used, or no path was explicitly given, just confirm success
-          agent.chat:add_tool_output(
-            agent.tool,
+          tools.chat:add_tool_output(
+            tools.tool,
             source_content, -- Still provide full content to the tool
             "**DAP Source Tool**: Successfully retrieved source content."
           )

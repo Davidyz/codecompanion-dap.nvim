@@ -5,9 +5,9 @@ local timer = require("codecompanion._extensions.dap.timer")
 local tool_name = "dap_stepping"
 
 ---@param opts CodeCompanionDap.ToolOpts
----@return CodeCompanion.Agent.Tool
+---@return CodeCompanion.Tools.Tool
 return function(opts)
-  ---@type CodeCompanion.Agent.Tool|{}
+  ---@type CodeCompanion.Tools.Tool|{}
   return {
     name = tool_name,
     schema = {
@@ -103,22 +103,22 @@ If you need to call stepIn, call `stepInTargets` first to verify the stepIn is p
       end,
     },
     output = {
-      ---@param self CodeCompanion.Agent.Tool
-      ---@param agent CodeCompanion.Agent
-      error = function(self, agent, _, stderr)
+      ---@param self CodeCompanion.Tools.Tool
+      ---@param tools CodeCompanion.Tools
+      error = function(self, tools, _, stderr)
         if type(stderr) == "table" then
           stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
         end
-        agent.chat:add_tool_output(
+        tools.chat:add_tool_output(
           self,
           stderr,
           string.format("**DAP Stepping Tool**: Failed with error:\n%s", stderr)
         )
       end,
-      ---@param agent CodeCompanion.Agent
-      success = function(_, agent, _, stdout)
-        agent.chat:add_tool_output(
-          agent.tool,
+      ---@param tools CodeCompanion.Tools
+      success = function(_, tools, _, stdout)
+        tools.chat:add_tool_output(
+          tools.tool,
           stdout[1],
           string.format("**DAP Stepping Tool**: %s", stdout[#stdout])
         )

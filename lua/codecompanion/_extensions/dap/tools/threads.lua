@@ -6,12 +6,12 @@ local utils = require("codecompanion._extensions.dap.utils")
 local tool_name = "dap_threads"
 
 ---@param opts CodeCompanionDap.ToolOpts
----@return CodeCompanion.Agent.Tool
+---@return CodeCompanion.Tools.Tool
 return function(opts)
   local scratch_buf_manager = require("codecompanion._extensions.dap.scratch_buf").new({
     bufname_prefix = "threads",
   })
-  ---@type CodeCompanion.Agent.Tool|{}
+  ---@type CodeCompanion.Tools.Tool|{}
   return {
     name = tool_name,
     schema = {
@@ -22,6 +22,12 @@ return function(opts)
 The request retrieves a list of all threads in the current DAP session. Calling it once will return all ongoing threads.
 This should be called before you're calling another dap tool that requires `threadId` as a parameter.
   ]],
+        parameters = {
+          type = "object",
+          properties = vim.empty_dict(),
+          required = {},
+          additionalProperties = false,
+        },
       },
     },
     cmds = {
@@ -47,20 +53,20 @@ This should be called before you're calling another dap tool that requires `thre
       end,
     },
     output = {
-      ---@param self CodeCompanion.Agent.Tool
-      ---@param agent CodeCompanion.Agent
-      error = function(self, agent, _, stderr)
+      ---@param self CodeCompanion.Tools.Tool
+      ---@param tools CodeCompanion.Tools
+      error = function(self, tools, _, stderr)
         if type(stderr) == "table" then
           stderr = table.concat(vim.iter(stderr):flatten(math.huge):totable(), "\n")
         end
-        agent.chat:add_tool_output(
+        tools.chat:add_tool_output(
           self,
           stderr,
           string.format("**DAP Threads Tool**: Failed with error:\n%s", stderr)
         )
       end,
-      ---@param agent CodeCompanion.Agent
-      success = function(_, agent, _, stdout)
+      ---@param tools CodeCompanion.Tools
+      success = function(_, tools, _, stdout)
         local threads = stdout[#stdout]
         local dap = require("dap")
 
@@ -73,17 +79,17 @@ This should be called before you're calling another dap tool that requires `thre
 
         local session = dap.session()
         if session == nil then
-          return agent.chat:add_tool_output(
-            agent.tool,
+          return tools.chat:add_tool_output(
+            tools.tool,
             "The DAP session is no longer active."
           )
         end
 
-        scratch_buf_manager:update(session, agent.chat, lines)
+        scratch_buf_manager:update(session, tools.chat, lines)
 
         local num_threads = #threads
-        agent.chat:add_tool_output(
-          agent.tool,
+        tools.chat:add_tool_output(
+          tools.tool,
           string.format(
             "The threads are available in the buffer named `%s`.",
             scratch_buf_manager:get_readable_bufname(session)
