@@ -36,7 +36,7 @@ Using `lazy.nvim`:
 
         tool_opts = {
           evaluate = {
-            requires_approval = true,
+            require_approval_before = true,
           },
           source = {
             -- load the file content from the
@@ -99,8 +99,9 @@ More features are on the way.
 
 ## Tool Options
 All tools have the following config option available:
-- `requires_approval`: `true` to require user approval before running this tool.
-  Default: `true` for evaluate, `false` for others.
+- `require_approval_before`: `true` to require user approval before running this tool.
+  Default: `true` for evaluate, `false` for others. (This was `requires_approval` if the 
+  codecompanion.nvim version is older than v18).
 
 The `source` tool has an extra option:
 - `prefer_filesystem`: `true` to load content from local file when possible, 

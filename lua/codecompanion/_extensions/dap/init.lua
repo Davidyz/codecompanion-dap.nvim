@@ -4,16 +4,19 @@
 
 ---@class CodeCompanionDap.ToolOpts
 ---@field requires_approval? boolean
+---@field require_approval_before? boolean
 
 ---@class CodeCompanionDap.Opts
----@field tool_opts {string: CodeCompanionDap.ToolOpts}
+---@field tool_opts table<string, CodeCompanionDap.ToolOpts>
 ---@field collapse_tools boolean
 ---@field interval_ms? integer
 ---@field winfixbuf? boolean
+
+---@type CodeCompanionDap.Opts
 local options = {
   tool_opts = {
     breakpoints = {},
-    evaluate = { requires_approval = true },
+    evaluate = { requires_approval = true, require_approval_before = true },
     scopes = {},
     source = {},
     stackTrace = {},
@@ -40,21 +43,38 @@ local Extension = {
 
     local config = require("codecompanion.config").config
     local tool_group = {}
+    local interactions = config.strategies or config.interactions
     for tool_name, tool_opts in pairs(options.tool_opts) do
       if tool_opts then
         local full_tool_name = "dap_" .. tool_name
-        config.strategies.chat.tools[full_tool_name] = {
+
+        local require_approval = tool_opts.requires_approval
+          or tool_opts.require_approval_before
+
+        if tool_opts.requires_approval then
+          vim.deprecate(
+            "requires_approval",
+            "require_approval_before",
+            "v18.0.0",
+            "codecompanion-dap.nvim",
+            false
+          )
+        end
+        interactions.chat.tools[full_tool_name] = {
           description = string.format("DAP %s tool", tool_name),
           callback = require(
             string.format("codecompanion._extensions.dap.tools.%s", tool_name)
           )(tool_opts),
-          opts = { requires_approval = tool_opts.requires_approval },
+          opts = {
+            requires_approval = require_approval,
+            require_approval_before = require_approval,
+          },
         }
         table.insert(tool_group, full_tool_name)
       end
     end
 
-    config.strategies.chat.tools.groups["dap"] = {
+    interactions.chat.tools.groups["dap"] = {
       opts = { collapse_tools = options.collapse_tools },
       tools = tool_group,
       description = "Some tools that expose a subset of the nvim-dap API to CodeCompanion.",
